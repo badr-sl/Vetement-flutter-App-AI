@@ -1,0 +1,51 @@
+plugins {
+    id "com.android.application"
+    // FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    id "kotlin-android"
+    // Le plugin Gradle de Flutter doit être appliqué après les plugins Android et Kotlin.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace "com.vetement.app"  // Modifiez avec un nom d'ID d'application valide
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    defaultConfig {
+        applicationId "com.vetement.app"  // Modifiez avec un ID d'application unique
+        minSdk = 23  // Définit le minSdk version
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            // Configurez ici votre configuration de signature pour la version release.
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0"
+    implementation platform('com.google.firebase:firebase-bom:31.0.0')  // Assurez-vous d'avoir la bonne version Firebase
+    implementation "com.google.firebase:firebase-analytics"
+    // Ajoutez ici d'autres dépendances Firebase selon vos besoins
+}
+
+apply plugin: 'com.google.gms.google-services'  // Ajoutez cette ligne à la fin pour Google services

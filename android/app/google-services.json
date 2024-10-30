@@ -1,0 +1,118 @@
+{
+  "project_info": {
+    "project_number": "96632359885",
+    "project_id": "vetement-app",
+    "storage_bucket": "vetement-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96632359885:android:be540615a3fa85beab9284",
+        "android_client_info": {
+          "package_name": "com.vetement.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUjUg0CJuthX0aeK2gnAxaao-RpqAO0RI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "96632359885-h5n0edbq5tied1frbkurl9glju0280h2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vetementsApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96632359885:android:ee426ceb40efa728ab9284",
+        "android_client_info": {
+          "package_name": "com.vetements.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUjUg0CJuthX0aeK2gnAxaao-RpqAO0RI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "96632359885-h5n0edbq5tied1frbkurl9glju0280h2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vetementsApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96632359885:android:3d85871a12a5c04aab9284",
+        "android_client_info": {
+          "package_name": "vetementapp.appspot.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUjUg0CJuthX0aeK2gnAxaao-RpqAO0RI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "96632359885-l1gg26320mkj20isb5uj6es6rkotgem7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "96632359885-h5n0edbq5tied1frbkurl9glju0280h2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vetementsApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
