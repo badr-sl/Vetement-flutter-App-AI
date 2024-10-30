@@ -18,7 +18,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
   TextEditingController _sizeController = TextEditingController();
   TextEditingController _brandController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
-  TextEditingController _categoryController = TextEditingController();
+  String _categorie = "Inconnu";
 
   @override
   void initState() {
@@ -28,10 +28,14 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
   Future<void> _loadModel() async {
     String? result = await Tflite.loadModel(
-      model: "assets/model_unquant.tflite", 
-      labels: "assets/labels.txt",           
+      model: "assets/model_unquant.tflite",
+      labels: "assets/labels.txt",
     );
-    print(result);
+    if (result != null) {
+      print("Modèle chargé : $result");
+    } else {
+      print("Erreur de chargement du modèle");
+    }
   }
 
   Future<void> _pickImage() async {
@@ -46,22 +50,30 @@ class _AddVetementPageState extends State<AddVetementPage> {
   }
 
   Future<void> _detectCategoryFromImage(File image) async {
-    var output = await Tflite.runModelOnImage(
-      path: image.path,
-      numResults: 1,  
-      threshold: 0.5, 
-    );
+  var output = await Tflite.runModelOnImage(
+    path: image.path,
+    numResults: 5,
+    threshold: 0.1,
+    imageMean: 127.5,
+    imageStd: 127.5,
+  );
 
-    if (output != null && output.isNotEmpty) {
-      setState(() {
-        _categoryController.text = output[0]["label"];  
-      });
-    } else {
-      setState(() {
-        _categoryController.text = "Inconnu";
-      });
+  if (output != null && output.isNotEmpty) {
+    for (var result in output) {
+      print("Label détecté : ${result['label']} avec confiance : ${result['confidence']}");
     }
+    setState(() {
+      _categorie = output[0]["label"] ?? "Inconnu";
+    });
+  } else {
+    setState(() {
+      _categorie = "Inconnu";
+    });
+    print("Aucun résultat de classification trouvé.");
   }
+}
+
+
 
   Future<void> _saveVetement() async {
     if (_formKey.currentState!.validate()) {
@@ -74,7 +86,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
         await _firestore.collection('Vetements').add({
           'nom': _titleController.text,
-          'categorie': _categoryController.text,
+          'categorie': _categorie,
           'taille': _sizeController.text,
           'marque': _brandController.text,
           'prix': double.tryParse(_priceController.text),
@@ -137,12 +149,6 @@ class _AddVetementPageState extends State<AddVetementPage> {
                 decoration: InputDecoration(labelText: 'Prix'),
                 keyboardType: TextInputType.number,
                 validator: (value) => value!.isEmpty ? "Veuillez saisir un prix" : null,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _categoryController,
-                decoration: InputDecoration(labelText: 'Catégorie'),
-                readOnly: true,
               ),
               SizedBox(height: 20),
               ElevatedButton(

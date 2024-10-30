@@ -134,8 +134,6 @@ class _PanierPageState extends State<PanierPage> {
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 8),
-                            Text("Marque : ${item['marque'] ?? 'N/A'}"),
-                            Text("categorie :${item['categorie'] ?? 'N/A'}"),
                             Text("Taille : ${item['taille'] ?? 'N/A'}"),
                             Text("Prix : ${itemPrice != null ? '${itemPrice} €' : 'N/A'}"),
                           ],

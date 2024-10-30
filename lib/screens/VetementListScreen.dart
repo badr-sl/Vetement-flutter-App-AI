@@ -86,7 +86,9 @@ class _VetementListScreenState extends State<VetementListScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 8),
-              Text("Taille : ${vetement.taille ?? 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text("Categorie : ${vetement.categorie ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
+              Text("Marque : ${vetement.marque ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
+              Text("Taille : ${vetement.taille ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
               Text("Prix : ${vetement.prix != null ? '${vetement.prix} €' : 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.green)),
               SizedBox(height: 20),
               Row(
