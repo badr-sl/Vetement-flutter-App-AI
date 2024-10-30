@@ -28,8 +28,8 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
   Future<void> _loadModel() async {
     String? result = await Tflite.loadModel(
-      model: "assets/model_unquant.tflite", // Remplacez par le nom de votre fichier
-      labels: "assets/labels.txt",           // Fichier des labels
+      model: "assets/model_unquant.tflite", 
+      labels: "assets/labels.txt",           
     );
     print(result);
   }
@@ -48,13 +48,13 @@ class _AddVetementPageState extends State<AddVetementPage> {
   Future<void> _detectCategoryFromImage(File image) async {
     var output = await Tflite.runModelOnImage(
       path: image.path,
-      numResults: 1,  // Récupérer la meilleure correspondance
-      threshold: 0.5, // Confiance minimale requise pour la classification
+      numResults: 1,  
+      threshold: 0.5, 
     );
 
     if (output != null && output.isNotEmpty) {
       setState(() {
-        _categoryController.text = output[0]["label"];  // Utilisez le label de la première sortie
+        _categoryController.text = output[0]["label"];  
       });
     } else {
       setState(() {
@@ -73,12 +73,12 @@ class _AddVetementPageState extends State<AddVetementPage> {
         }
 
         await _firestore.collection('Vetements').add({
-          'titre': _titleController.text,
+          'nom': _titleController.text,
           'categorie': _categoryController.text,
           'taille': _sizeController.text,
           'marque': _brandController.text,
           'prix': double.tryParse(_priceController.text),
-          'imageBase64': base64Image,
+          'image': base64Image,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Vêtement ajouté avec succès")));

@@ -57,78 +57,85 @@ class _VetementListScreenState extends State<VetementListScreen> {
 
 
   void _showVetementDetailsPopup(Vetement vetement) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: EdgeInsets.all(16),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (vetement.image != null)
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.memory(
-                        base64Decode(vetement.image!),
-                        height: 200,
-                        width: 200,
-                        fit: BoxFit.cover,
-                      ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.all(16),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (vetement.image != null)
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.memory(
+                      base64Decode(vetement.image!),
+                      height: 200,
+                      width: 200,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                SizedBox(height: 16),
-                Text(
-                  vetement.nom ?? 'Nom indisponible',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-                  textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 8),
-                Text("Categorie : ${vetement.categorie ?? 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-                Text("Marque : ${vetement.marque ?? 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-                Text("Taille : ${vetement.taille ?? 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-                Text("Prix : ${vetement.prix != null ? '${vetement.prix} €' : 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.green)),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.arrow_back, color: Colors.white),
-                      label: Text("Retour", style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[700],
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+              SizedBox(height: 16),
+              Text(
+                vetement.nom ?? 'Nom indisponible',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Text("Taille : ${vetement.taille ?? 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text("Prix : ${vetement.prix != null ? '${vetement.prix} €' : 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.green)),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.arrow_back, color: Colors.white, size: 18),
+                    label: Text(
+                      "Retour",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.add_shopping_cart, color: Colors.white),
-                      label: Text("Ajouter au panier", style: TextStyle(color: Colors.white)),
-                      onPressed: () async {
-                        await _ajouterAuPanier(vetement);
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Produit ajouté au panier !")),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      backgroundColor: Colors.grey[700],
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.add_shopping_cart, color: Colors.white, size: 18),
+                    label: Text(
+                      "Ajouter au panier",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    onPressed: () async {
+                      await _ajouterAuPanier(vetement);
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Produit ajouté au panier !")),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 
   Future<void> _ajouterAuPanier(Vetement vetement) async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -200,8 +207,6 @@ class _VetementListScreenState extends State<VetementListScreen> {
                                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                                 ),
                                 SizedBox(height: 8),
-                                Text("Categorie : ${vetement.categorie ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
-                                Text("Marque : ${vetement.marque ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
                                 Text("Taille : ${vetement.taille ?? 'N/A'}", style: TextStyle(color: Colors.grey[700])),
                                 Text("Prix : ${vetement.prix != null ? '${vetement.prix} €' : 'N/A'}", style: TextStyle(fontSize: 16, color: Colors.green)),
                               ],

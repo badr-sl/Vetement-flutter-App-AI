@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace "com.vetement.app"  // Modifiez avec un nom d'ID d'application valide
+    namespace "com.vetement.app"  
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.vetement.app"  // Modifiez avec un ID d'application unique
+        applicationId "com.vetement.app"  
         minSdk = 23  // Définit le minSdk version
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -45,7 +45,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0"
     implementation platform('com.google.firebase:firebase-bom:31.0.0')  // Assurez-vous d'avoir la bonne version Firebase
     implementation "com.google.firebase:firebase-analytics"
-    // Ajoutez ici d'autres dépendances Firebase selon vos besoins
+    
 }
 
 apply plugin: 'com.google.gms.google-services'  // Ajoutez cette ligne à la fin pour Google services
