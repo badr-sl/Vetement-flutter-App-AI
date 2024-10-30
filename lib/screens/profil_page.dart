@@ -191,7 +191,8 @@ class _ProfilPageState extends State<ProfilPage> {
               label: Text('Valider', style: TextStyle(fontSize: 18)),
               onPressed: _updateUserInfo,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                 foregroundColor: Colors.white,
+                backgroundColor: const Color.fromARGB(255, 44, 255, 51),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
@@ -236,7 +237,8 @@ class _ProfilPageState extends State<ProfilPage> {
                       icon: Icon(Icons.logout),
                       label: Text('Se déconnecter', style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                         foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromARGB(255, 255, 144, 144),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),

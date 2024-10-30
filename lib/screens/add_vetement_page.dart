@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tflite/tflite.dart';
 
 class AddVetementPage extends StatefulWidget {
   @override
@@ -17,24 +18,49 @@ class _AddVetementPageState extends State<AddVetementPage> {
   TextEditingController _sizeController = TextEditingController();
   TextEditingController _brandController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
+  TextEditingController _categoryController = TextEditingController();
 
-  String? _category;
-
- Future<void> _pickImage() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery); // Change here
-  if (pickedFile != null) {
-    setState(() {
-      _imageFile = File(pickedFile.path);
-      _category = _detectCategoryFromImage(_imageFile!);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadModel();
   }
-}
 
+  Future<void> _loadModel() async {
+    String? result = await Tflite.loadModel(
+      model: "assets/model_unquant.tflite", // Remplacez par le nom de votre fichier
+      labels: "assets/labels.txt",           // Fichier des labels
+    );
+    print(result);
+  }
 
-  String _detectCategoryFromImage(File image) {
-    // Placeholder for actual image recognition logic
-    return "Haut"; // Update as needed based on the image
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+      _detectCategoryFromImage(_imageFile!);
+    }
+  }
+
+  Future<void> _detectCategoryFromImage(File image) async {
+    var output = await Tflite.runModelOnImage(
+      path: image.path,
+      numResults: 1,  // Récupérer la meilleure correspondance
+      threshold: 0.5, // Confiance minimale requise pour la classification
+    );
+
+    if (output != null && output.isNotEmpty) {
+      setState(() {
+        _categoryController.text = output[0]["label"];  // Utilisez le label de la première sortie
+      });
+    } else {
+      setState(() {
+        _categoryController.text = "Inconnu";
+      });
+    }
   }
 
   Future<void> _saveVetement() async {
@@ -48,7 +74,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
         await _firestore.collection('Vetements').add({
           'titre': _titleController.text,
-          'categorie': _category,
+          'categorie': _categoryController.text,
           'taille': _sizeController.text,
           'marque': _brandController.text,
           'prix': double.tryParse(_priceController.text),
@@ -114,7 +140,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                initialValue: _category,
+                controller: _categoryController,
                 decoration: InputDecoration(labelText: 'Catégorie'),
                 readOnly: true,
               ),
@@ -132,5 +158,11 @@ class _AddVetementPageState extends State<AddVetementPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    Tflite.close();
+    super.dispose();
   }
 }
