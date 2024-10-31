@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tflite/tflite.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AddVetementPage extends StatefulWidget {
   @override
@@ -13,6 +15,7 @@ class AddVetementPage extends StatefulWidget {
 class _AddVetementPageState extends State<AddVetementPage> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Uint8List? _imageData;
   File? _imageFile;
   TextEditingController _titleController = TextEditingController();
   TextEditingController _sizeController = TextEditingController();
@@ -27,59 +30,94 @@ class _AddVetementPageState extends State<AddVetementPage> {
   }
 
   Future<void> _loadModel() async {
-    String? result = await Tflite.loadModel(
-      model: "assets/model_unquant.tflite",
-      labels: "assets/labels.txt",
-    );
-    if (result != null) {
-      print("Modèle chargé : $result");
-    } else {
-      print("Erreur de chargement du modèle");
+    try {
+      String? result = await Tflite.loadModel(
+        model: "assets/model_unquant.tflite",
+        labels: "assets/labels.txt",
+      );
+      print("Model loaded: $result");
+    } catch (e) {
+      print("Error loading model: $e");
     }
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
     if (pickedFile != null) {
+      if (kIsWeb) {
+        // For web, use Uint8List
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _imageData = bytes;
+          _imageFile = null;
+        });
+        _detectCategoryFromImageWeb(bytes);
+      } else {
+        // For mobile, use File
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _imageData = null;
+        });
+        _detectCategoryFromImageMobile(_imageFile!);
+      }
+    }
+  }
+
+  Future<void> _detectCategoryFromImageWeb(Uint8List imageData) async {
+    try {
+      var output = await Tflite.runModelOnBinary(
+        binary: imageData,
+        numResults: 5,
+        threshold: 0.5,
+      );
+
       setState(() {
-        _imageFile = File(pickedFile.path);
+        if (output != null && output.isNotEmpty) {
+          _categorie = output[0]["label"] ?? "Inconnu";
+          print("Detected label: $_categorie");
+        } else {
+          _categorie = "Inconnu";
+          print("No classification result found.");
+        }
       });
-      _detectCategoryFromImage(_imageFile!);
+    } catch (e) {
+      print("Error in image classification: $e");
     }
   }
 
-  Future<void> _detectCategoryFromImage(File image) async {
-  var output = await Tflite.runModelOnImage(
-    path: image.path,
-    numResults: 5,
-    threshold: 0.1,
-    imageMean: 127.5,
-    imageStd: 127.5,
-  );
+  Future<void> _detectCategoryFromImageMobile(File image) async {
+    try {
+      var output = await Tflite.runModelOnImage(
+        path: image.path,
+        numResults: 5,
+        threshold: 0.5,
+        imageMean: 127.5,
+        imageStd: 127.5,
+      );
 
-  if (output != null && output.isNotEmpty) {
-    for (var result in output) {
-      print("Label détecté : ${result['label']} avec confiance : ${result['confidence']}");
+      setState(() {
+        if (output != null && output.isNotEmpty) {
+          _categorie = output[0]["label"] ?? "Inconnu";
+          print("Detected label: $_categorie");
+        } else {
+          _categorie = "Inconnu";
+          print("No classification result found.");
+        }
+      });
+    } catch (e) {
+      print("Error in image classification: $e");
     }
-    setState(() {
-      _categorie = output[0]["label"] ?? "Inconnu";
-    });
-  } else {
-    setState(() {
-      _categorie = "Inconnu";
-    });
-    print("Aucun résultat de classification trouvé.");
   }
-}
-
-
 
   Future<void> _saveVetement() async {
     if (_formKey.currentState!.validate()) {
       try {
         String base64Image = '';
-        if (_imageFile != null) {
+        if (_imageData != null) {
+          base64Image = base64Encode(_imageData!);
+        } else if (_imageFile != null) {
           final bytes = await _imageFile!.readAsBytes();
           base64Image = base64Encode(bytes);
         }
@@ -120,9 +158,11 @@ class _AddVetementPageState extends State<AddVetementPage> {
                   height: 150,
                   width: double.infinity,
                   color: Colors.grey[300],
-                  child: _imageFile == null
-                      ? Icon(Icons.add_a_photo, color: Colors.white70, size: 50)
-                      : Image.file(_imageFile!, fit: BoxFit.cover),
+                  child: _imageData != null
+                      ? Image.memory(_imageData!, fit: BoxFit.cover)
+                      : _imageFile != null
+                          ? Image.file(_imageFile!, fit: BoxFit.cover)
+                          : Icon(Icons.add_a_photo, color: Colors.white70, size: 50),
                 ),
               ),
               SizedBox(height: 16),

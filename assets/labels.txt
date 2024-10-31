@@ -1,2 +1,4 @@
-0 HAUT
-1 Pontalone
+0 Veste
+1 T-shirt
+2 Pantalon
+3 Chaussures

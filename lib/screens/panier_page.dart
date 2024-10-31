@@ -32,7 +32,7 @@ class _PanierPageState extends State<PanierPage> {
 
     for (var doc in panierSnapshot.docs) {
       Map<String, dynamic> item = doc.data() as Map<String, dynamic>;
-      item['id'] = doc.id; // Store the document ID to reference for deletion
+      item['id'] = doc.id; 
       items.add(item);
       calculatedTotal += item['prix'] ?? 0.0;
     }
@@ -54,38 +54,37 @@ class _PanierPageState extends State<PanierPage> {
   }
 
   void _onBottomNavigationTapped(int index) {
-  if (index != _currentIndex) {
-    setState(() {
-      _currentIndex = index;
-    });
-    Widget destination;
-    switch (index) {
-      case 0:
-        destination = VetementListScreen();
-        break;
-      case 1:
-        destination = PanierPage();
-        break;
-      case 2:
-        destination = ProfilPage();
-        break;
-      default:
-        return;
+    if (index != _currentIndex) {
+      setState(() {
+        _currentIndex = index;
+      });
+      Widget destination;
+      switch (index) {
+        case 0:
+          destination = VetementListScreen();
+          break;
+        case 1:
+          destination = PanierPage();
+          break;
+        case 2:
+          destination = ProfilPage();
+          break;
+        default:
+          return;
+      }
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => destination,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+        ),
+      );
     }
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => destination,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +122,8 @@ class _PanierPageState extends State<PanierPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      imageWidget, 
-                      SizedBox(width: 16), 
+                      imageWidget,
+                      SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +134,7 @@ class _PanierPageState extends State<PanierPage> {
                             ),
                             SizedBox(height: 8),
                             Text("Taille : ${item['taille'] ?? 'N/A'}"),
-                            Text("Prix : ${itemPrice != null ? '${itemPrice} €' : 'N/A'}"),
+                            Text("Prix : ${itemPrice.toStringAsFixed(2)} €"),
                           ],
                         ),
                       ),
@@ -162,7 +161,7 @@ class _PanierPageState extends State<PanierPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Total: $total €",
+              "Total: ${total.toStringAsFixed(2)} €",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
