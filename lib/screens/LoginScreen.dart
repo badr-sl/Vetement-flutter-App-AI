@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vetements_app/screens/UserSession.dart';
 import 'package:vetements_app/screens/VetementListScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login() async {
     try {
-      // Authentification avec Firebase
+      // Authenticate with Firebase
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -26,16 +27,21 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userCredential.user != null) {
         String uid = userCredential.user!.uid;
 
-        // Récupère le document de l'utilisateur dans Firestore
+        // Retrieve the user document from Firestore
         DocumentSnapshot userDoc = await _firestore.collection('Users').doc(uid).get();
         Map<String, dynamic> userInfo = userDoc.data() as Map<String, dynamic>;
 
+        // Set session data
+        UserSession().setUserInfo(
+          uid: uid,
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+          additionalInfo: userInfo,
+        );
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => VetementListScreen(),
-            settings: RouteSettings(arguments: userInfo),
-          ),
+          MaterialPageRoute(builder: (context) => VetementListScreen()),
         );
       } else {
         setState(() {
@@ -49,11 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+ 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Connexion'),
+        title: Text('Pedro Store'),
         centerTitle: true,
         backgroundColor: Color(0xFF3A6EA5),
         foregroundColor: Colors.white,
@@ -83,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: 'Login',
                       labelStyle: TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: Color(0xFFF1F3F5),
@@ -98,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Mot de passe',
+                      labelText: 'Password',
                       labelStyle: TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: Color(0xFFF1F3F5),

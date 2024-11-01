@@ -4,8 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tflite/tflite.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:tflite/tflite.dart';
+
 
 class AddVetementPage extends StatefulWidget {
   @override
@@ -26,7 +27,9 @@ class _AddVetementPageState extends State<AddVetementPage> {
   @override
   void initState() {
     super.initState();
-    _loadModel();
+    if (!kIsWeb) {
+      _loadModel();
+    }
   }
 
   Future<void> _loadModel() async {
@@ -47,43 +50,20 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
     if (pickedFile != null) {
       if (kIsWeb) {
-        // For web, use Uint8List
         final bytes = await pickedFile.readAsBytes();
         setState(() {
           _imageData = bytes;
           _imageFile = null;
         });
-        _detectCategoryFromImageWeb(bytes);
+        // For web, handle classification using an alternative method or skip it.
+        print("Web platform selected, skipping TFLite classification.");
       } else {
-        // For mobile, use File
         setState(() {
           _imageFile = File(pickedFile.path);
           _imageData = null;
         });
         _detectCategoryFromImageMobile(_imageFile!);
       }
-    }
-  }
-
-  Future<void> _detectCategoryFromImageWeb(Uint8List imageData) async {
-    try {
-      var output = await Tflite.runModelOnBinary(
-        binary: imageData,
-        numResults: 5,
-        threshold: 0.5,
-      );
-
-      setState(() {
-        if (output != null && output.isNotEmpty) {
-          _categorie = output[0]["label"] ?? "Inconnu";
-          print("Detected label: $_categorie");
-        } else {
-          _categorie = "Inconnu";
-          print("No classification result found.");
-        }
-      });
-    } catch (e) {
-      print("Error in image classification: $e");
     }
   }
 
@@ -208,7 +188,9 @@ class _AddVetementPageState extends State<AddVetementPage> {
 
   @override
   void dispose() {
-    Tflite.close();
+    if (!kIsWeb) {
+      Tflite.close();
+    }
     super.dispose();
   }
 }

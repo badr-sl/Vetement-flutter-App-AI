@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vetements_app/screens/UserSession.dart';
 import 'package:vetements_app/screens/VetementListScreen.dart';
 import 'package:vetements_app/screens/panier_page.dart';
 import 'package:vetements_app/widgets/CustomBottomNavigationBar.dart';
@@ -33,33 +34,18 @@ class _ProfilPageState extends State<ProfilPage> {
     _loadUserInfo();
   }
 
-  Future<void> _loadUserInfo() async {
-    try {
-      String uid = _auth.currentUser!.uid;
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(uid).get();
+   void _loadUserInfo() {
+    final session = UserSession();
 
-      if (userDoc.exists) {
-        Map<String, dynamic> userInfo = userDoc.data() as Map<String, dynamic>;
-
-        setState(() {
-          emailController.text = userInfo['email'] ?? '';
-          anniversaireController.text = userInfo['anniversaire'] ?? '';
-          adresseController.text = userInfo['address'] ?? '';
-          codePostalController.text = userInfo['codePostal']?.toString() ?? '';
-          villeController.text = userInfo['ville'] ?? '';
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      log("Error loading user data: $e");
-      setState(() {
-        isLoading = false;
-      });
-    }
+    setState(() {
+      emailController.text = session.email ?? '';
+      passwordController.text = session.password ?? '';
+      anniversaireController.text = session.additionalInfo?['anniversaire'] ?? '';
+      adresseController.text = session.additionalInfo?['address'] ?? '';
+      codePostalController.text = session.additionalInfo?['codePostal']?.toString() ?? '';
+      villeController.text = session.additionalInfo?['ville'] ?? '';
+      isLoading = false;
+    });
   }
 
   Future<void> _updateUserInfo() async {
@@ -216,7 +202,9 @@ class _ProfilPageState extends State<ProfilPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildTextField(emailController, 'Email', readOnly: true),
+                            _buildTextField(emailController, 'Login', readOnly: true),
+                            SizedBox(height: 12),
+                            _buildTextField(passwordController, 'Password', obscureText: true),
                             SizedBox(height: 12),
                             _buildTextField(anniversaireController, 'Anniversaire', keyboardType: TextInputType.datetime, onTap: _pickDate),
                             SizedBox(height: 12),
@@ -225,8 +213,7 @@ class _ProfilPageState extends State<ProfilPage> {
                             _buildTextField(codePostalController, 'Code Postal', keyboardType: TextInputType.number),
                             SizedBox(height: 12),
                             _buildTextField(villeController, 'Ville'),
-                            SizedBox(height: 12),
-                            _buildTextField(passwordController, 'Nouveau mot de passe', obscureText: true),
+                            
                           ],
                         ),
                       ),
