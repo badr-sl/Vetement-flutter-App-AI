@@ -21,7 +21,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
   TextEditingController _sizeController = TextEditingController();
   TextEditingController _brandController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
-  String _categorie = "Inconnu";
+  String _categorie = "";
   bool _isCategoryLoading = false; 
 
   Future<void> _pickImage() async {
@@ -68,12 +68,12 @@ class _AddVetementPageState extends State<AddVetementPage> {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         setState(() {
-          _categorie = result[0]["label"] ?? "Inconnu";
+          _categorie = result[0]["label"] ?? "";
         });
         isLoading = false;
       } else if (response.statusCode == 503) {
         print("Model loading, retrying in a few seconds...");
-        await Future.delayed(Duration(seconds: 1)); // Wait and retry
+        await Future.delayed(Duration(seconds: 0)); 
         retries++;
       } else {
         print("Failed to classify image: ${response.statusCode}");
@@ -161,7 +161,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
               if (_isCategoryLoading)
                 CircularProgressIndicator()
               else
-                Text("Catégorie détectée: $_categorie", style: TextStyle(fontSize: 16)),
+                Text("Catégorie : $_categorie", style: TextStyle(fontSize: 16)),
               SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
