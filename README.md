@@ -1,20 +1,39 @@
-<<<<<<< HEAD
-# Vetement-flutter-App-AI
-=======
-# vetements_app
-pour les compte :
+Here’s a structured README for your project:
 
-login : badr.eddine@gmail.com / password : 123456
-login : a.badido620gmt@gmail.com /password : 123456
+---
 
-pour le code de  AI  :
+# Vetement AI Flutter App
 
-pour la  spécification de la catégorie il prend un peut du temps pour affiche la catégorie dan le formuler 
-mai la catégorie s'affiche dans les detail aprée l'ajout du vetement et ce stock dans la db 
+This application allows users to upload images of clothing, which the app then classifies into categories using AI image recognition from Hugging Face. The detected category, along with other details, is stored in a Firestore database.
 
-<< HEAD
+## Features
+- **User Authentication**: Users can log in with pre-created accounts.
+- **AI-Powered Image Classification**: Uses Hugging Face’s `google/vit-base-patch16-224` model for category classification.
+- **Firestore Integration**: Saves clothing items and their categories in a database.
+- **Real-Time UI Updates**: Displays the detected category in the form after image upload.
+
+---
+
+## Account Information
+To log in to the application, use one of the following credentials:
+
+- **Email**: `badr.eddine@gmail.com`  
+  **Password**: `123456`
+
+- **Email**: `a.badido620gmt@gmail.com`  
+  **Password**: `123456`
+
+---
+
+## AI Image Classification
+> **Note**: The AI model may take a moment to load before it displays the category in the form. However, the category will be visible in the details section once the item is saved and added to the database.
+
+### API Integration Code Snippet
+The following function integrates with Hugging Face’s API to classify clothing images. It retries up to 5 times in case the model is still loading.
+
+```dart
 Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
-  final String apiToken = "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"; 
+  final String apiToken = "YOUR_HUGGING_FACE_API_TOKEN"; 
   final url = Uri.parse("https://api-inference.huggingface.co/models/google/vit-base-patch16-224");
 
   bool isLoading = true;
@@ -40,11 +59,10 @@ Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
         isLoading = false;
       } else if (response.statusCode == 503) {
         print("Model loading, retrying in a few seconds...");
-        await Future.delayed(Duration(seconds: 0)); 
+        await Future.delayed(Duration(seconds: 5)); 
         retries++;
       } else {
         print("Failed to classify image: ${response.statusCode}");
-        print("Response body: ${response.body}");
         setState(() {
           _categorie = "Erreur de classification";
         });
@@ -66,22 +84,18 @@ Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
     });
   }
 }
+```
 
+---
 
+## Getting Started with Flutter
 
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
+This project is built with Flutter. To start working with Flutter, here are some useful resources:
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- [Flutter Documentation](https://docs.flutter.dev/): Offers tutorials, samples, and a comprehensive API reference.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
->>>>>>> 4d83c40 (Initial commit)
+---
+
+This README provides an overview of the app’s features and setup. For additional information, refer to the Flutter documentation and Hugging Face's API documentation for integrating machine learning models.
