@@ -22,8 +22,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
   TextEditingController _brandController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
   String _categorie = "Inconnu";
-
-  final String _apiToken = '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'; // Your Hugging Face API token
+  bool _isCategoryLoading = false; 
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -36,43 +35,73 @@ class _AddVetementPageState extends State<AddVetementPage> {
           _imageData = bytes;
           _imageFile = null;
         });
-        await _classifyImageWithHuggingFace(bytes);
+        _detectCategoryFromImageHuggingFace(bytes);
       } else {
         setState(() {
           _imageFile = File(pickedFile.path);
           _imageData = null;
         });
-        final bytes = await _imageFile!.readAsBytes();
-        await _classifyImageWithHuggingFace(bytes);
+        _detectCategoryFromImageHuggingFace(await _imageFile!.readAsBytes());
       }
     }
   }
 
-  Future<void> _classifyImageWithHuggingFace(Uint8List imageData) async {
-    final url = Uri.parse('https://api-inference.huggingface.co/models/google/vit-base-patch16-224'); // Change to your preferred model
+  Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
+  final String apiToken = "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"; 
+  final url = Uri.parse("https://api-inference.huggingface.co/models/google/vit-base-patch16-224");
+
+  bool isLoading = true;
+  int retries = 0;
+  const maxRetries = 5;
+
+  while (isLoading && retries < maxRetries) {
     try {
       final response = await http.post(
         url,
         headers: {
-          'Authorization': 'Bearer $_apiToken',
-          'Content-Type': 'application/octet-stream',
+          "Authorization": "Bearer $apiToken",
+          "Content-Type": "application/octet-stream",
         },
         body: imageData,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> result = json.decode(response.body);
+        final result = jsonDecode(response.body);
         setState(() {
-          _categorie = result.isNotEmpty ? result[0]["label"] : "Inconnu";
+          _categorie = result[0]["label"] ?? "Inconnu";
         });
-        print("Detected label: $_categorie");
+        isLoading = false;
+      } else if (response.statusCode == 503) {
+        print("Model loading, retrying in a few seconds...");
+        await Future.delayed(Duration(seconds: 1)); // Wait and retry
+        retries++;
       } else {
         print("Failed to classify image: ${response.statusCode}");
+        print("Response body: ${response.body}");
+        setState(() {
+          _categorie = "Erreur de classification";
+        });
+        isLoading = false;
       }
     } catch (e) {
-      print("Error in image classification: $e");
+      print("Error during API call: $e");
+      setState(() {
+        _categorie = "Erreur de classification";
+      });
+      isLoading = false;
     }
   }
+
+  if (isLoading && retries >= maxRetries) {
+    print("Model failed to load after multiple retries.");
+    setState(() {
+      _categorie = "Erreur de classification";
+    });
+  }
+}
+
+
+
 
   Future<void> _saveVetement() async {
     if (_formKey.currentState!.validate()) {
@@ -128,6 +157,11 @@ class _AddVetementPageState extends State<AddVetementPage> {
                           : Icon(Icons.add_a_photo, color: Colors.white70, size: 50),
                 ),
               ),
+              SizedBox(height: 16),
+              if (_isCategoryLoading)
+                CircularProgressIndicator()
+              else
+                Text("Catégorie détectée: $_categorie", style: TextStyle(fontSize: 16)),
               SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
