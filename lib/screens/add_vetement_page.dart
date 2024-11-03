@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:tflite/tflite.dart';
-
+import 'package:http/http.dart' as http;
 
 class AddVetementPage extends StatefulWidget {
   @override
@@ -24,25 +23,7 @@ class _AddVetementPageState extends State<AddVetementPage> {
   TextEditingController _priceController = TextEditingController();
   String _categorie = "Inconnu";
 
-  @override
-  void initState() {
-    super.initState();
-    if (!kIsWeb) {
-      _loadModel();
-    }
-  }
-
-  Future<void> _loadModel() async {
-    try {
-      String? result = await Tflite.loadModel(
-        model: "assets/model_unquant.tflite",
-        labels: "assets/labels.txt",
-      );
-      print("Model loaded: $result");
-    } catch (e) {
-      print("Error loading model: $e");
-    }
-  }
+  final String _apiToken = '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'; // Your Hugging Face API token
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -55,37 +36,39 @@ class _AddVetementPageState extends State<AddVetementPage> {
           _imageData = bytes;
           _imageFile = null;
         });
-        // For web, handle classification using an alternative method or skip it.
-        print("Web platform selected, skipping TFLite classification.");
+        await _classifyImageWithHuggingFace(bytes);
       } else {
         setState(() {
           _imageFile = File(pickedFile.path);
           _imageData = null;
         });
-        _detectCategoryFromImageMobile(_imageFile!);
+        final bytes = await _imageFile!.readAsBytes();
+        await _classifyImageWithHuggingFace(bytes);
       }
     }
   }
 
-  Future<void> _detectCategoryFromImageMobile(File image) async {
+  Future<void> _classifyImageWithHuggingFace(Uint8List imageData) async {
+    final url = Uri.parse('https://api-inference.huggingface.co/models/google/vit-base-patch16-224'); // Change to your preferred model
     try {
-      var output = await Tflite.runModelOnImage(
-        path: image.path,
-        numResults: 5,
-        threshold: 0.5,
-        imageMean: 127.5,
-        imageStd: 127.5,
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_apiToken',
+          'Content-Type': 'application/octet-stream',
+        },
+        body: imageData,
       );
 
-      setState(() {
-        if (output != null && output.isNotEmpty) {
-          _categorie = output[0]["label"] ?? "Inconnu";
-          print("Detected label: $_categorie");
-        } else {
-          _categorie = "Inconnu";
-          print("No classification result found.");
-        }
-      });
+      if (response.statusCode == 200) {
+        final List<dynamic> result = json.decode(response.body);
+        setState(() {
+          _categorie = result.isNotEmpty ? result[0]["label"] : "Inconnu";
+        });
+        print("Detected label: $_categorie");
+      } else {
+        print("Failed to classify image: ${response.statusCode}");
+      }
     } catch (e) {
       print("Error in image classification: $e");
     }
@@ -184,13 +167,5 @@ class _AddVetementPageState extends State<AddVetementPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    if (!kIsWeb) {
-      Tflite.close();
-    }
-    super.dispose();
   }
 }
