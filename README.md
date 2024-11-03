@@ -29,7 +29,7 @@ To log in to the application, use one of the following credentials:
 > **Note**: The AI model may take a moment to load before it displays the category in the form. However, the category will be visible in the details section once the item is saved and added to the database.
 
 ### API Integration Code Snippet
-The following function integrates with Hugging Face’s API to classify clothing images. It retries up to 5 times in case the model is still loading.
+The following function integrates with Hugging Face’s API to classify clothing images. It retries up to 5 times in case the model is still loading and the image must be small taille.
 
 ```dart
 Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
