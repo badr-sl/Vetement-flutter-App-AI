@@ -48,74 +48,85 @@ class _ProfilPageState extends State<ProfilPage> {
     });
   }
 
-  Future<void> _updateUserInfo() async {
-    if (_formKey.currentState!.validate()) {
-      String uid = _auth.currentUser!.uid;
-      try {
-        await _firestore.collection('Users').doc(uid).update({
-          'email': emailController.text,
-          'anniversaire': anniversaireController.text,
-          'address': adresseController.text,
-          'codePostal': int.tryParse(codePostalController.text) ?? 0,
-          'ville': villeController.text,
-        });
+ Future<void> _updateUserInfo() async {
+  if (_formKey.currentState!.validate()) {
+    String uid = _auth.currentUser!.uid;
+    try {
+      // Only prompt for password update if the password field has been modified
+      if (passwordController.text.isNotEmpty && passwordController.text != UserSession().password) {
+        // Prompt for the current password only if a new password is provided
+        String currentPassword = await _promptCurrentPassword();
+        User? user = _auth.currentUser;
+        AuthCredential credential = EmailAuthProvider.credential(
+          email: user!.email!,
+          password: currentPassword,
+        );
 
-        if (passwordController.text.isNotEmpty) {
-          try {
-            String currentPassword = await _promptCurrentPassword();
-            User? user = _auth.currentUser;
-            AuthCredential credential = EmailAuthProvider.credential(
-              email: user!.email!,
-              password: currentPassword,
-            );
-            await user.reauthenticateWithCredential(credential);
-            await user.updatePassword(passwordController.text);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mot de passe mis à jour")));
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text("Erreur lors de la mise à jour du mot de passe : ${e}"),
-              backgroundColor: Colors.red,
-            ));
-          }
-        }
+        // Reauthenticate with the current password
+        await user.reauthenticateWithCredential(credential);
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Profil mis à jour")));
-      } catch (e) {
-        log("Error updating user data: $e");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Erreur lors de la mise à jour du profil"),
-          backgroundColor: Colors.red,
-        ));
+        // Update the password
+        await user.updatePassword(passwordController.text);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mot de passe mis à jour")));
       }
+
+      // Update other user info in Firestore (address, email, etc.) without reauthentication
+      await _firestore.collection('Users').doc(uid).update({
+        'email': emailController.text,
+        'anniversaire': anniversaireController.text,
+        'address': adresseController.text,
+        'codePostal': int.tryParse(codePostalController.text) ?? 0,
+        'ville': villeController.text,
+      });
+
+      // Show success message for profile update
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Profil mis à jour")));
+
+    } catch (e) {
+      // Handle errors during update
+      log("Error updating user data: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Erreur lors de la mise à jour du profil : ${e}"),
+        backgroundColor: Colors.red,
+      ));
     }
   }
+}
+
+
+
+
+
 
   Future<String> _promptCurrentPassword() async {
-    String currentPassword = '';
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Confirmer le mot de passe actuel'),
-        content: TextField(
-          autofocus: true,
-          obscureText: true,
-          decoration: InputDecoration(labelText: 'Mot de passe actuel'),
-          onChanged: (value) => currentPassword = value,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Confirmer'),
-          ),
-        ],
+  String currentPassword = '';
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Confirmer le mot de passe actuel'),
+      content: TextField(
+        autofocus: true,
+        obscureText: true,
+        decoration: InputDecoration(labelText: 'Mot de passe actuel'),
+        onChanged: (value) => currentPassword = value,
       ),
-    );
-    return currentPassword;
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),  
+          child: Text('Annuler'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();  
+          },
+          child: Text('Confirmer'),
+        ),
+      ],
+    ),
+  );
+  return currentPassword;
+}
+
 
   void _logout() async {
     await _auth.signOut();
