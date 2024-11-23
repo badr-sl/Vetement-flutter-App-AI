@@ -47,7 +47,8 @@ class _AddVetementPageState extends State<AddVetementPage> {
   }
 
   Future<void> _detectCategoryFromImageHuggingFace(Uint8List imageData) async {
-  final String apiToken = "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"; 
+  final String apiToken = ""; // add your API token here from the hugging face website
+  
   final url = Uri.parse("https://api-inference.huggingface.co/models/google/vit-base-patch16-224");
 
   bool isLoading = true;
